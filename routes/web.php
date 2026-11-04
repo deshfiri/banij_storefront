@@ -12,8 +12,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/cc/{token}', function ($token) {
 
-    if (!hash_equals((string) config('services.cc_token'), $token)
-        || !config('services.cc_token')) {
+    if (
+        !hash_equals((string) config('services.cc_token'), $token)
+        || !config('services.cc_token')
+    ) {
         abort(403, 'Unauthorized');
     }
 
