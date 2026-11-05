@@ -67,6 +67,16 @@ function storefrontFlashes(): array
 }
 
 /**
+ * Categories as the ERP lists them.
+ *
+ * @return list<array{id: string, slug: string, name: string}>
+ */
+function storefrontCategories(int $count): array
+{
+    return array_map(static fn (int $n): array => ['id' => '01C'.$n, 'slug' => 'category-'.$n, 'name' => 'Category '.$n], range(1, $count));
+}
+
+/**
  * The details a customer types at checkout.
  *
  * @param  array<string, string>  $overrides

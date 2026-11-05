@@ -277,11 +277,11 @@
                 $banner = safe_url($brand['banner_url'] ?? null);
                 $bannerLink = is_array($brand['banner_link'] ?? null) ? $brand['banner_link'] : null;
                 $bannerLabel = t('home.banner_label', ['name' => $shopName]);
-                $bannerClasses = 'block h-auto max-h-[650px] w-full object-cover object-center';
+                $bannerClasses = 'block h-auto w-full object-cover object-center';
             @endphp
             <section class="relative mt-5 w-full px-3 pb-4 sm:px-6 sm:pb-6 lg:px-8" aria-label="{{ $bannerLabel }}">
 
-                <div class="mx-auto w-full max-w-[1700px] overflow-hidden rounded-xl sm:rounded-2xl">
+                <div class="banner {{ $banner === '' ? 'banner-plain ' : '' }}mx-auto mb-0 w-full max-w-[1700px] sm:rounded-2xl">
 
                     @if ($banner !== '')
                         @if ($bannerLink !== null)
@@ -338,10 +338,10 @@
         {{-- Main Footer --}}
         <div class="mx-auto max-w-[1600px] px-5 py-12 sm:px-8 lg:px-12 lg:py-16">
 
-            <div class="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3 lg:gap-12">
+            <div class="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-12">
 
                 {{-- Brand --}}
-                <div>
+                <div class="sm:col-span-2">
 
                     <a href="{{ route('home') }}" class="mb-4 inline-flex items-center no-underline"
                         aria-label="{{ $shopName }}">
@@ -372,7 +372,7 @@
                         {{ t('footer.shop') }}
                     </h3>
 
-                    <ul class="space-y-3 text-sm">
+                    <ul class="m-0 list-none space-y-3 p-0 text-sm">
 
                         <li>
                             <a href="{{ route('products.index') }}"
@@ -414,7 +414,7 @@
                         {{ t('footer.help') }}
                     </h3>
 
-                    <ul class="space-y-3 text-sm text-slate-500">
+                    <ul class="m-0 list-none space-y-3 p-0 text-sm text-slate-500">
 
                         <li>
                             <a href="{{ route('track.form') }}"

@@ -8,6 +8,17 @@
 /* Scan Laravel Blade files */
 @source "../views/**/*.blade.php";
 
+/*
+ * Tailwind's `container` utility is capped at its breakpoints and has no gutter, which
+ * overrides the page gutter in app.css and pins content to the screen edge on a phone.
+ * The shop's own container wins.
+ */
+.container {
+    width: min(1280px, 100% - 2rem);
+    max-width: none;
+    margin-inline: auto;
+}
+
 /* =========================================
    Mini Minds Category Navigation
 ========================================= */
@@ -65,6 +76,22 @@
     width: max-content;
     animation: category-scroll 40s linear infinite;
     will-change: transform;
+}
+
+/* A short list does not loop: it stays put and scrolls by hand when it overflows. */
+
+.category-marquee--static {
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.category-marquee--static::-webkit-scrollbar {
+    display: none;
+}
+
+.category-marquee__track--static {
+    animation: none;
+    transform: none;
 }
 
 /* Category Groups */
