@@ -63,7 +63,7 @@ function storefrontPost(FoundationTestCase $test, string $uri, array $data = [],
  */
 function storefrontFlashes(): array
 {
-    return array_map(static fn (array $flash): string => $flash['message'], (array) session('_flash', []));
+    return array_map(static fn (array $flash): string => $flash['message'], (array) session('storefront_messages', []));
 }
 
 /**
