@@ -69,7 +69,7 @@
         <nav aria-label="Breadcrumb" class="mb-6 flex items-center gap-2 text-sm text-gray-500">
 
             <a href="{{ route('home') }}" class="hover:text-amber-600">
-                Home
+                {{ t('nav.home') }}
             </a>
 
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -77,7 +77,7 @@
             </svg>
 
             <a href="{{ route('products.index') }}" class="hover:text-amber-600">
-                Shop
+                {{ t('nav.shop') }}
             </a>
 
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -93,7 +93,7 @@
         <div class="mb-8">
 
             <p class="mb-2 text-sm font-semibold uppercase tracking-wider text-gray-500">
-                Category
+                {{ t('catalog.category_label') }}
             </p>
 
             <h1 class="text-3xl font-bold text-gray-900 md:text-4xl">
@@ -101,7 +101,7 @@
             </h1>
 
             <p class="mt-3 text-sm text-gray-500">
-                {{ count($products) }} products
+                {{ t('catalog.product_count', ['n' => num((string) count($products))]) }}
             </p>
 
         </div>
@@ -199,7 +199,7 @@
                     </h2>
 
                     <p class="mt-2 text-sm text-gray-500">
-                        There are currently no products in this category.
+                        {{ t('catalog.category_empty') }}
                     </p>
 
                     <a href="{{ route('products.index') }}"

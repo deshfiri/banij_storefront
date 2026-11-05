@@ -251,35 +251,61 @@
 
 
 
-    {{-- @if (!($site['accepting_orders'] ?? true))
+    @if (!($site['accepting_orders'] ?? true))
         <div class="notice notice-warning" role="status">
             <div class="container">
                 {{ t('site.not_accepting') }}
             </div>
         </div>
-    @endif --}}
+    @endif
 
 
     <main id="main" class="w-full  ">
 
         {{-- Existing Flash Messages --}}
-        @foreach ($flash ?? [] as $message)
-            {{-- <div class="flash flash-{{ $message['type'] }}"
-                role="{{ $message['type'] === 'error' ? 'alert' : 'status' }}">
-                {{ $message['message'] }} --}}
-            </div>
-        @endforeach
+        <div class="container">
+            @foreach ($flash ?? [] as $message)
+                <div class="flash flash-{{ $message['type'] }}"
+                    role="{{ $message['type'] === 'error' ? 'alert' : 'status' }}">{{ $message['message'] }}</div>
+            @endforeach
+        </div>
 
         {{-- Homepage Hero Banner --}}
         @if (request()->routeIs('home'))
-            <section class="relative mt-5 w-full px-3 pb-4 sm:px-6 sm:pb-6 lg:px-8">
+            @php
+                // The banner is the shop's own, from the ERP; nothing is drawn over the picture.
+                $banner = safe_url($brand['banner_url'] ?? null);
+                $bannerLink = is_array($brand['banner_link'] ?? null) ? $brand['banner_link'] : null;
+                $bannerLabel = t('home.banner_label', ['name' => $shopName]);
+                $bannerClasses = 'block h-auto max-h-[650px] w-full object-cover object-center';
+            @endphp
+            <section class="relative mt-5 w-full px-3 pb-4 sm:px-6 sm:pb-6 lg:px-8" aria-label="{{ $bannerLabel }}">
 
                 <div class="mx-auto w-full max-w-[1700px] overflow-hidden rounded-xl sm:rounded-2xl">
 
-                    <img src="{{ asset('assets/home_images/home_images.jpg') }}"
-                        alt="{{ $shopName }} - Homepage Banner"
-                        class="block h-auto max-h-[650px] w-full object-cover object-center" fetchpriority="high"
-                        decoding="async">
+                    @if ($banner !== '')
+                        @if ($bannerLink !== null)
+                            <a class="banner-link" href="{{ $bannerLink['url'] }}"{!! $bannerLink['external'] ? ' target="_blank" rel="noopener noreferrer"' : '' !!}
+                                aria-label="{{ $bannerLabel }}">
+                                <img src="{{ $banner }}" alt="" width="1600" height="560"
+                                    class="{{ $bannerClasses }}" fetchpriority="high" decoding="async"
+                                    data-fallback="banner-fallback">
+                            </a>
+                        @else
+                            <img src="{{ $banner }}" alt="" width="1600" height="560"
+                                class="{{ $bannerClasses }}" fetchpriority="high" decoding="async"
+                                data-fallback="banner-fallback">
+                        @endif
+                        <div class="banner-fallback" hidden>
+                            <h1>{{ $shopName }}</h1>
+                            @if (!empty($brand['tagline']))<p>{{ $brand['tagline'] }}</p>@endif
+                        </div>
+                    @else
+                        <div class="banner-fallback">
+                            <h1>{{ $shopName }}</h1>
+                            @if (!empty($brand['tagline']))<p>{{ $brand['tagline'] }}</p>@endif
+                        </div>
+                    @endif
 
                 </div>
 
@@ -312,83 +338,29 @@
         {{-- Main Footer --}}
         <div class="mx-auto max-w-[1600px] px-5 py-12 sm:px-8 lg:px-12 lg:py-16">
 
-            <div class="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-5 lg:gap-12">
+            <div class="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3 lg:gap-12">
 
                 {{-- Brand --}}
-                <div class="lg:col-span-1">
+                <div>
 
-                    <a href="{{ route('products.index') }}" class="mb-4 inline-flex items-center no-underline">
+                    <a href="{{ route('home') }}" class="mb-4 inline-flex items-center no-underline"
+                        aria-label="{{ $shopName }}">
 
-                        <img src="https://minimindsplay.com/storage/settings/6B5OmcUkpscJc7XS43TLLvGFOPIfGwYpP6lAMXub.webp"
-                            alt="Mini Minds" class="h-14 w-auto max-w-[180px] object-contain" loading="lazy">
+                        @if ($logo !== '')
+                            <img src="{{ $logo }}" alt="" class="h-14 w-auto max-w-[180px] object-contain"
+                                loading="lazy" data-fallback="footer-brand-name">
+                        @endif
+
+                        <span class="footer-brand-name text-lg font-extrabold text-sky-600"
+                            {!! $logo !== '' ? ' hidden' : '' !!}>{{ $shopName }}</span>
 
                     </a>
 
-                    <p class="max-w-xs text-sm leading-7 text-slate-500">
-                        Bangladesh's most trusted online marketplace.
-                    </p>
-
-                    {{-- Social Media --}}
-                    <div class="mt-6 flex items-center gap-3">
-
-                        {{-- Facebook --}}
-                        <a href="https://www.facebook.com/minimindsplay" target="_blank" rel="noopener noreferrer"
-                            aria-label="Facebook"
-                            class="flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-600 ring-1 ring-gray-200 transition hover:bg-sky-500 hover:text-white hover:ring-sky-500">
-
-                            <svg viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor" aria-hidden="true">
-                                <path
-                                    d="M13.5 21v-8.2h2.8l.4-3.2h-3.2V7.5c0-.9.3-1.5 1.6-1.5h1.7V3.1c-.3 0-1.4-.1-2.6-.1-2.6 0-4.4 1.6-4.4 4.5v2.1H7v3.2h2.8V21h3.7z" />
-                            </svg>
-
-                        </a>
-
-                        {{-- YouTube --}}
-                        @if (!empty($brand['youtube']))
-                            <a href="{{ $brand['youtube'] }}" target="_blank" rel="noopener noreferrer"
-                                aria-label="YouTube"
-                                class="flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-600 ring-1 ring-gray-200 transition hover:bg-red-500 hover:text-white hover:ring-red-500">
-
-                                <svg viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor" aria-hidden="true">
-                                    <path
-                                        d="M23 7.2a3 3 0 0 0-2.1-2.1C19 4.6 12 4.6 12 4.6s-7 0-8.9.5A3 3 0 0 0 1 7.2 31 31 0 0 0 .5 12a31 31 0 0 0 .5 4.8 3 3 0 0 0 2.1 2.1c1.9.5 8.9.5 8.9.5s7 0 8.9-.5a3 3 0 0 0 2.1-2.1 31 31 0 0 0 .5-4.8 31 31 0 0 0-.5-4.8ZM9.8 15.3V8.7l5.8 3.3-5.8 3.3Z" />
-                                </svg>
-
-                            </a>
-                        @endif
-
-                        {{-- Instagram --}}
-                        @if (!empty($brand['instagram']))
-                            <a href="{{ $brand['instagram'] }}" target="_blank" rel="noopener noreferrer"
-                                aria-label="Instagram"
-                                class="flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-600 ring-1 ring-gray-200 transition hover:bg-pink-500 hover:text-white hover:ring-pink-500">
-
-                                <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor"
-                                    stroke-width="1.8" aria-hidden="true">
-                                    <rect x="3" y="3" width="18" height="18" rx="5" />
-                                    <circle cx="12" cy="12" r="4" />
-                                    <circle cx="18" cy="6" r="1" fill="currentColor"
-                                        stroke="none" />
-                                </svg>
-
-                            </a>
-                        @endif
-
-                        {{-- TikTok --}}
-                        @if (!empty($brand['tiktok']))
-                            <a href="{{ $brand['tiktok'] }}" target="_blank" rel="noopener noreferrer"
-                                aria-label="TikTok"
-                                class="flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-600 ring-1 ring-gray-200 transition hover:bg-slate-900 hover:text-white hover:ring-slate-900">
-
-                                <svg viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor" aria-hidden="true">
-                                    <path
-                                        d="M19.6 8.2a7.3 7.3 0 0 1-4.4-1.5v7.1a5.7 5.7 0 1 1-5.7-5.7c.4 0 .8 0 1.2.1v3.2a2.6 2.6 0 1 0 1.4 2.4V2.5h3.2c.2 2.1 1.8 3.8 4.3 4v1.7Z" />
-                                </svg>
-
-                            </a>
-                        @endif
-
-                    </div>
+                    @if (!empty($brand['tagline']))
+                        <p class="max-w-xs text-sm leading-7 text-slate-500">
+                            {{ $brand['tagline'] }}
+                        </p>
+                    @endif
 
                 </div>
 
@@ -397,36 +369,29 @@
                 <div>
 
                     <h3 class="mb-5 text-sm font-bold uppercase tracking-wider text-slate-900">
-                        Shop
+                        {{ t('footer.shop') }}
                     </h3>
 
                     <ul class="space-y-3 text-sm">
 
                         <li>
-                            <a href="{{ route('products.index', ['sort' => 'discount']) }}"
+                            <a href="{{ route('products.index') }}"
                                 class="text-slate-500 no-underline transition hover:text-sky-600">
-                                Flash Deals
+                                {{ t('nav.all') }}
                             </a>
                         </li>
 
                         <li>
                             <a href="{{ route('products.index', ['sort' => 'newest']) }}"
                                 class="text-slate-500 no-underline transition hover:text-sky-600">
-                                New Arrivals
+                                {{ t('home.new_arrivals') }}
                             </a>
                         </li>
 
                         <li>
-                            <a href="{{ route('products.index', ['sort' => 'popular']) }}"
+                            <a href="{{ route('products.index', ['sort' => 'best_selling']) }}"
                                 class="text-slate-500 no-underline transition hover:text-sky-600">
-                                Best Sellers
-                            </a>
-                        </li>
-
-                        <li>
-                            <a href="{{ route('products.index') }}"
-                                class="text-slate-500 no-underline transition hover:text-sky-600">
-                                All Categories
+                                {{ t('home.best_sellers') }}
                             </a>
                         </li>
 
@@ -442,159 +407,53 @@
                 </div>
 
 
-                {{-- Support --}}
+                {{-- Help --}}
                 <div>
 
                     <h3 class="mb-5 text-sm font-bold uppercase tracking-wider text-slate-900">
-                        Support
+                        {{ t('footer.help') }}
                     </h3>
 
-                    <ul class="space-y-3 text-sm">
+                    <ul class="space-y-3 text-sm text-slate-500">
 
                         <li>
                             <a href="{{ route('track.form') }}"
                                 class="text-slate-500 no-underline transition hover:text-sky-600">
-                                Track Order
+                                {{ t('nav.track') }}
                             </a>
                         </li>
 
                         <li>
-                            <a href="https://minimindsplay.com/page/return-policy"
+                            <a href="{{ route('about') }}"
                                 class="text-slate-500 no-underline transition hover:text-sky-600">
-                                Returns
-                            </a>
-                        </li>
-
-                        <li>
-                            <a href="https://minimindsplay.com/page/faq"
-                                class="text-slate-500 no-underline transition hover:text-sky-600">
-                                FAQ
+                                {{ t('page.about') }}
                             </a>
                         </li>
 
                         <li>
                             <a href="{{ route('contact') }}"
                                 class="text-slate-500 no-underline transition hover:text-sky-600">
-                                Contact Us
+                                {{ t('page.contact') }}
                             </a>
                         </li>
+
+                        @if (!empty($site['contact']['phone']))
+                            <li>{{ $site['contact']['phone'] }}</li>
+                        @endif
+
+                        @if (!empty($site['contact']['email']))
+                            <li>{{ $site['contact']['email'] }}</li>
+                        @endif
+
+                        @if (!empty($site['contact']['address']))
+                            <li>{{ $site['contact']['address'] }}</li>
+                        @endif
 
                     </ul>
-
-                </div>
-
-
-                {{-- Company --}}
-                <div>
-
-                    <h3 class="mb-5 text-sm font-bold uppercase tracking-wider text-slate-900">
-                        Company
-                    </h3>
-
-                    <ul class="space-y-3 text-sm">
-
-                        <li>
-                            <a href="{{ route('about') }}"
-                                class="text-slate-500 no-underline transition hover:text-sky-600">
-                                About Us
-                            </a>
-                        </li>
-
-                        <li>
-                            <a href="https://minimindsplay.com/page/privacy-policy"
-                                class="text-slate-500 no-underline transition hover:text-sky-600">
-                                Privacy Policy
-                            </a>
-                        </li>
-
-                        <li>
-                            <a href="https://minimindsplay.com/page/terms"
-                                class="text-slate-500 no-underline transition hover:text-sky-600">
-                                Terms & Conditions
-                            </a>
-                        </li>
-
-                        <li>
-                            <a href="https://minimindsplay.com/page/shipping-policy"
-                                class="text-slate-500 no-underline transition hover:text-sky-600">
-                                Shipping Policy
-                            </a>
-                        </li>
-
-                    </ul>
-
-                </div>
-
-
-                {{-- Get the App --}}
-                <div>
-
-                    <h3 class="mb-5 text-sm font-bold uppercase tracking-wider text-slate-900">
-                        Get the App
-                    </h3>
-
-                    <p class="mb-5 text-sm leading-6 text-slate-500">
-                        Shop faster with our mobile app coming soon to your store.
-                    </p>
-
-                    <div class="flex flex-wrap gap-3">
-
-                        <a href="https://minimindsplay.com/#"
-                            class="flex items-center gap-3 rounded-xl bg-slate-900 px-4 py-3 text-white no-underline transition hover:bg-slate-700">
-
-                            <svg viewBox="0 0 24 24" class="h-7 w-7" fill="currentColor" aria-hidden="true">
-                                <path
-                                    d="M16.4 12.7c0-2 1.6-3 1.7-3.1a3.7 3.7 0 0 0-2.9-1.6c-1.2-.1-2.3.7-2.9.7s-1.5-.7-2.5-.7a3.8 3.8 0 0 0-3.2 2c-1.4 2.4-.4 6 1 8 .7 1 1.5 2.1 2.5 2.1s1.3-.7 2.6-.7 1.6.7 2.6.7 1.7-1 2.4-2a9 9 0 0 0 1.1-2.3 3.5 3.5 0 0 1-2.4-3.1ZM14.5 6.8A3.5 3.5 0 0 0 15.3 4a3.7 3.7 0 0 0-2.5 1.3 3.3 3.3 0 0 0-.8 2.7 3.2 3.2 0 0 0 2.5-1.2Z" />
-                            </svg>
-
-                            <span>
-                                <span class="block text-[10px]">Download on the</span>
-                                <span class="block text-sm font-semibold">App Store</span>
-                            </span>
-
-                        </a>
-
-                        <a href="https://minimindsplay.com/#"
-                            class="flex items-center gap-3 rounded-xl bg-slate-900 px-4 py-3 text-white no-underline transition hover:bg-slate-700">
-
-                            <svg viewBox="0 0 24 24" class="h-7 w-7" fill="currentColor" aria-hidden="true">
-                                <path
-                                    d="M3.5 2.5 14 12 3.5 21.5c-.3-.3-.5-.8-.5-1.4V3.9c0-.6.2-1.1.5-1.4Zm1.2-.8 11 6.3-2.5 2.3L4.7 1.7Zm11 13.3 2.8 1.6-11 6.3 8.2-7.9Zm4.2-4.2c.9.5.9 1.9 0 2.4l-2.8 1.6-3-2.8 3-2.8 2.8 1.6Z" />
-                            </svg>
-
-                            <span>
-                                <span class="block text-[10px]">Get it on</span>
-                                <span class="block text-sm font-semibold">Google Play</span>
-                            </span>
-
-                        </a>
-
-                    </div>
 
                 </div>
 
             </div>
-
-
-            {{-- Contact Information --}}
-            @if (!empty($site['contact']['phone']) || !empty($site['contact']['email']) || !empty($site['contact']['address']))
-                <div
-                    class="mt-12 flex flex-col gap-3 border-t border-gray-200 pt-7 text-sm text-slate-500 sm:flex-row sm:flex-wrap sm:items-center sm:gap-7">
-
-                    @if (!empty($site['contact']['phone']))
-                        <span>{{ $site['contact']['phone'] }}</span>
-                    @endif
-
-                    @if (!empty($site['contact']['email']))
-                        <span>{{ $site['contact']['email'] }}</span>
-                    @endif
-
-                    @if (!empty($site['contact']['address']))
-                        <span>{{ $site['contact']['address'] }}</span>
-                    @endif
-
-                </div>
-            @endif
 
         </div>
 
@@ -611,17 +470,26 @@
 
                 <div class="flex flex-col items-center gap-4 sm:flex-row">
 
-                    {{-- Payment Methods --}}
-                    <div class="flex items-center gap-3">
-                        <span class="text-xs font-semibold text-slate-500">
-                            We accept
-                        </span>
+                    {{-- Payment methods: what the ERP has switched on, not a picture. --}}
+                    @php
+                        $acceptedGateways = array_values(array_filter((array) ($site['gateways'] ?? []), 'is_array'));
+                        $acceptsCod = !empty($site['cod']['enabled']);
+                    @endphp
+                    @if ($acceptedGateways !== [] || $acceptsCod)
+                        <div class="flex flex-wrap items-center justify-center gap-3 text-xs text-slate-500">
+                            <span class="font-semibold">{{ t('footer.we_accept') }}</span>
 
-                        <img src="{{ asset('assets/img/payment-methods.png') }}" alt="Accepted payment methods"
-                            class="h-8 max-w-[190px] object-contain" loading="lazy">
-                    </div>
+                            @foreach ($acceptedGateways as $gateway)
+                                <span>@include('partials.gateway', ['gateway' => $gateway])</span>
+                            @endforeach
 
-                    <span class="hidden h-5 w-px bg-gray-200 sm:block"></span>
+                            @if ($acceptsCod)
+                                <strong>{{ t('payment.cod') }}</strong>
+                            @endif
+                        </div>
+
+                        <span class="hidden h-5 w-px bg-gray-200 sm:block"></span>
+                    @endif
 
                     <span class="text-xs text-slate-500">
                         {{ t('footer.powered') }}
