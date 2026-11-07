@@ -6,6 +6,7 @@ use App\Services\Basket;
 use App\Services\Orders;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as FoundationTestCase;
+use Illuminate\Testing\TestResponse;
 use Tests\Support\FakeErp;
 use Tests\TestCase;
 
@@ -38,7 +39,7 @@ function storefrontBasket(array $lines = [['FW-1-M', 2]]): string
  * @param  array<string, mixed>  $session
  * @param  array<string, string>  $cookies
  */
-function storefrontGet(FoundationTestCase $test, string $uri, array $session = [], array $cookies = []): Illuminate\Testing\TestResponse
+function storefrontGet(FoundationTestCase $test, string $uri, array $session = [], array $cookies = []): TestResponse
 {
     return $test->withSession($session)->withUnencryptedCookies($cookies)->get($uri);
 }
@@ -51,7 +52,7 @@ function storefrontGet(FoundationTestCase $test, string $uri, array $session = [
  * @param  array<string, mixed>  $session
  * @param  array<string, string>  $cookies
  */
-function storefrontPost(FoundationTestCase $test, string $uri, array $data = [], array $session = [], array $cookies = []): Illuminate\Testing\TestResponse
+function storefrontPost(FoundationTestCase $test, string $uri, array $data = [], array $session = [], array $cookies = []): TestResponse
 {
     return $test->withSession(['_token' => 'tok'] + $session)->withUnencryptedCookies($cookies)->post($uri, ['_token' => 'tok'] + $data);
 }
