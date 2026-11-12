@@ -126,47 +126,6 @@
         }
     });
 
-    // Light / dark switch. The page follows the system until the visitor chooses;
-    // the choice is remembered in this browser (theme.js applies it before paint).
-    var themeToggle = document.querySelector('[data-theme-toggle]');
-
-    if (themeToggle) {
-        var root = document.documentElement;
-        var systemDark = window.matchMedia('(prefers-color-scheme: dark)');
-        var isDark = function () {
-            var set = root.getAttribute('data-theme');
-
-            return set ? set === 'dark' : systemDark.matches;
-        };
-        var syncLabel = function () {
-            themeToggle.setAttribute(
-                'aria-label',
-                themeToggle.getAttribute(
-                    isDark() ? 'data-label-light' : 'data-label-dark',
-                ),
-            );
-        };
-
-        themeToggle.hidden = false;
-        syncLabel();
-
-        themeToggle.addEventListener('click', function () {
-            var next = isDark() ? 'light' : 'dark';
-
-            root.setAttribute('data-theme', next);
-
-            try {
-                window.localStorage.setItem('theme', next);
-            } catch (error) {
-                // Storage blocked: the choice lasts for this page view only.
-            }
-
-            syncLabel();
-        });
-
-        systemDark.addEventListener('change', syncLabel);
-    }
-
     // Gallery thumbnails swap the large image.
     var hero = document.getElementById('hero-image');
 
@@ -189,19 +148,206 @@
     });
 
     // A second click must not send an order twice.
+    // Buttons may sit outside the form and name it with the `form` attribute.
+    var submitButtons = function (form) {
+        var own = Array.prototype.slice.call(
+            form.querySelectorAll('button[type="submit"]'),
+        );
+
+        if (form.id) {
+            document
+                .querySelectorAll(
+                    'button[type="submit"][form="' + form.id + '"]',
+                )
+                .forEach(function (button) {
+                    if (own.indexOf(button) === -1) {
+                        own.push(button);
+                    }
+                });
+        }
+
+        return own;
+    };
+
     document.querySelectorAll('form[data-once]').forEach(function (form) {
-        form.addEventListener('submit', function () {
-            form.querySelectorAll('button[type="submit"]').forEach(
-                function (button) {
-                    button.setAttribute('aria-busy', 'true');
-                    // Disabled on the next tick: disabling inside the submit handler can cancel the submit in some browsers.
-                    window.setTimeout(function () {
-                        button.disabled = true;
-                    }, 0);
-                },
-            );
+        var labels = new WeakMap();
+
+        form.addEventListener('submit', function (event) {
+            // A submit that something else stopped (e.g. a field to fix) sends nothing.
+            if (event.defaultPrevented) {
+                return;
+            }
+
+            submitButtons(form).forEach(function (button) {
+                var label = button.querySelector('.co-btn-label');
+
+                button.setAttribute('aria-busy', 'true');
+
+                if (label && button.getAttribute('data-busy')) {
+                    labels.set(button, label.textContent);
+                    label.textContent = button.getAttribute('data-busy');
+                }
+
+                // Disabled on the next tick: disabling inside the submit handler can cancel the submit in some browsers.
+                window.setTimeout(function () {
+                    button.disabled = true;
+                }, 0);
+            });
+        });
+
+        // Coming back with the browser's Back button must not leave the page locked.
+        window.addEventListener('pageshow', function (event) {
+            if (!event.persisted) {
+                return;
+            }
+
+            submitButtons(form).forEach(function (button) {
+                var label = button.querySelector('.co-btn-label');
+
+                button.removeAttribute('aria-busy');
+                button.disabled = false;
+
+                if (label && labels.has(button)) {
+                    label.textContent = labels.get(button);
+                }
+            });
         });
     });
+
+    // Checkout form: say what is wrong beside the field, before the round trip.
+    // Display only: the server validates again and has the last word.
+    var checkout = document.querySelector('form[data-checkout]');
+
+    if (checkout) {
+        var rules = {
+            phone: function (value) {
+                var digits = value.replace(/\D/g, '');
+
+                return (
+                    /^[0-9+\-\s()]+$/.test(value) &&
+                    digits.length >= 10 &&
+                    digits.length <= 15
+                );
+            },
+            email: function (value) {
+                return value === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+            },
+            name: function (value) {
+                return value.length >= 2;
+            },
+        };
+
+        var message = function (field, text) {
+            var id = 'err-' + field.id;
+            var existing = document.getElementById(id);
+
+            if (!text) {
+                if (existing) {
+                    existing.remove();
+                }
+
+                field.removeAttribute('aria-describedby');
+                field.removeAttribute('aria-invalid');
+
+                return;
+            }
+
+            if (!existing) {
+                existing = document.createElement('p');
+                existing.className = 'co-error';
+                existing.id = id;
+                existing.setAttribute('role', 'alert');
+                field.parentNode.appendChild(existing);
+            }
+
+            existing.textContent = text;
+            field.setAttribute('aria-invalid', 'true');
+            field.setAttribute('aria-describedby', id);
+        };
+
+        var check = function (field) {
+            var value = field.value.trim();
+            var rule = rules[field.id];
+            var ok = field.required
+                ? value !== '' && (!rule || rule(value))
+                : !rule || rule(value);
+
+            message(field, ok ? '' : field.getAttribute('data-msg'));
+            field.classList.toggle('is-valid', ok && value !== '');
+
+            return ok;
+        };
+
+        var fields = checkout.querySelectorAll('input[data-msg]');
+
+        fields.forEach(function (field) {
+            field.addEventListener('blur', function () {
+                if (field.value !== '' || field.required) {
+                    check(field);
+                }
+            });
+
+            // Once flagged, tell the customer the moment it is fixed.
+            field.addEventListener('input', function () {
+                if (field.getAttribute('aria-invalid') === 'true') {
+                    check(field);
+                }
+            });
+        });
+
+        // Capture phase: runs before the double-submit guard, which respects a cancelled submit.
+        checkout.addEventListener(
+            'submit',
+            function (event) {
+                var first = null;
+
+                fields.forEach(function (field) {
+                    if (!check(field) && first === null) {
+                        first = field;
+                    }
+                });
+
+                if (first !== null) {
+                    event.preventDefault();
+                    first.focus();
+                    first.scrollIntoView({
+                        block: 'center',
+                        behavior: window.matchMedia(
+                            '(prefers-reduced-motion: reduce)',
+                        ).matches
+                            ? 'auto'
+                            : 'smooth',
+                    });
+                }
+            },
+            true,
+        );
+    }
+
+    // Order summary: always open beside the form on a wide screen, folded
+    // away on a phone (where the bar below the page still shows the total).
+    var summary = document.querySelector('details[data-summary]');
+
+    if (summary && window.matchMedia) {
+        var wide = window.matchMedia('(min-width: 901px)');
+        var head = summary.querySelector('summary');
+
+        var fit = function () {
+            summary.open = wide.matches;
+        };
+
+        head.addEventListener('click', function (event) {
+            if (wide.matches) {
+                event.preventDefault();
+            }
+        });
+
+        fit();
+
+        if (wide.addEventListener) {
+            wide.addEventListener('change', fit);
+        }
+    }
 
     document.querySelectorAll('form[data-confirm]').forEach(function (form) {
         form.addEventListener('submit', function (event) {

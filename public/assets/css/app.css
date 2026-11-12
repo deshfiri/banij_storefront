@@ -24,55 +24,8 @@
     --accent: #c2410c;
     --on-accent: #ffffff;
     font-size: 16px;
-    color-scheme: light dark;
-}
-
-/*
- * Light and dark. With no saved choice the page follows the visitor's system;
- * the header switch (theme.js / app.js) sets data-theme="light|dark" on <html>
- * and that wins over the system either way. The dark values are written twice
- * because a media query and an attribute selector cannot share one rule.
- */
-:root[data-theme='light'] {
+    /* The storefront is light only: no system or saved theme changes it. */
     color-scheme: light;
-}
-
-:root[data-theme='dark'] {
-    color-scheme: dark;
-    --bg: #f8fafc;
-    --surface: #f8fafc;
-    --surface-2: #f8fafc;
-    --text: #1b1a18;
-    --muted: #6a645e;
-    --line: #e6e3df;
-    --danger: #b42318;
-    --ok: #157f3b;
-    --warn: #9a5b00;
-    --shadow: 0 1px 2px rgba(20, 16, 10, 0.05), 0 6px 18px rgba(20, 16, 10, 0.05);
-}
-
-/* The brand colour is chosen for a light page; on a dark one text links are lifted. */
-:root[data-theme='dark'] a:not(.btn):not(.banner-link) {
-    color: color-mix(in srgb, var(--brand) 45%, #fff);
-}
-
-@media (prefers-color-scheme: dark) {
-    :root:not([data-theme='light']) {
-        --bg: #f8fafc;
-        --surface: #f8fafc;
-        --surface-2: #f8fafc;
-        --text: #1b1a18;
-        --muted: #6a645e;
-        --line: #e6e3df;
-        --danger: #b42318;
-        --ok: #157f3b;
-        --warn: #9a5b00;
-        --shadow: 0 1px 2px rgba(20, 16, 10, 0.05), 0 6px 18px rgba(20, 16, 10, 0.05);
-    }
-
-    :root:not([data-theme='light']) a:not(.btn):not(.banner-link) {
-        color: color-mix(in srgb, var(--brand) 45%, #fff);
-    }
 }
 
 *,
@@ -1286,50 +1239,6 @@ section {
     --surface: #f8fafc;
     --surface-2: #f8fafc;
 }
-:root[data-theme='dark'] {
-    --bg: #f8fafc;
-    --surface: #f8fafc;
-    --surface-2: #f8fafc;
-}
-@media (prefers-color-scheme: dark) {
-    :root:not([data-theme='light']) {
-        --bg: #f8fafc;
-        --surface: #f8fafc;
-        --surface-2: #f8fafc;
-    }
-}
-
-.theme-toggle {
-    display: inline-grid;
-    place-items: center;
-    width: 44px;
-    height: 44px;
-    padding: 0;
-    border: 0;
-    background: none;
-    color: inherit;
-    cursor: pointer;
-}
-.theme-toggle[hidden] {
-    display: none;
-}
-.theme-toggle .icon-sun {
-    display: none;
-}
-:root[data-theme='dark'] .theme-toggle .icon-moon {
-    display: none;
-}
-:root[data-theme='dark'] .theme-toggle .icon-sun {
-    display: block;
-}
-@media (prefers-color-scheme: dark) {
-    :root:not([data-theme='light']) .theme-toggle .icon-moon {
-        display: none;
-    }
-    :root:not([data-theme='light']) .theme-toggle .icon-sun {
-        display: block;
-    }
-}
 .container {
     width: min(1280px, 100%);
 }
@@ -1720,4 +1629,774 @@ a.btn.btn-accent {
 }
 .btn.track-submit:hover {
     background: #0369a1;
+}
+
+/* ==========================================================================
+   Checkout form (`.co`). Scoped: nothing here styles another page.
+   Surfaces and lines come from :root; the blue is the storefront's own.
+   ========================================================================== */
+.co {
+    --co-radius: 16px;
+    /* The storefront's own blue (header, cart button, steps), so the page reads as one. */
+    --co-primary: #0369a1;
+    --co-primary-strong: #075985;
+    --co-on-primary: #fff;
+    --co-ring: color-mix(in srgb, var(--co-primary) 22%, transparent);
+    --co-shadow: 0 1px 2px rgb(20 18 15 / 0.05), 0 8px 24px -12px rgb(20 18 15 / 0.12);
+    padding-bottom: 1rem;
+}
+.co .co-ico {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex: none;
+}
+
+.co-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: 2rem;
+    align-items: start;
+}
+.co-form {
+    min-width: 0;
+}
+.co-required-note {
+    margin: 0 0 0.9rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+/* --- cards ---------------------------------------------------------------- */
+.co-card {
+    min-width: 0;
+    margin: 0 0 1.25rem;
+    padding: 1.4rem 1.5rem 1.6rem;
+    border: 1px solid var(--line);
+    border-radius: var(--co-radius);
+    background: var(--surface);
+    box-shadow: var(--co-shadow);
+}
+.co-card > legend {
+    float: left;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin: 0 0 0.4rem;
+    padding: 0;
+}
+.co-card > legend + * {
+    clear: both;
+}
+.co-card-icon {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--co-primary) 9%, var(--surface));
+    color: var(--co-primary);
+}
+.co-card-icon .co-ico {
+    width: 1.35rem;
+    height: 1.35rem;
+}
+.co-card-title {
+    display: grid;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+}
+.co-card-title small {
+    margin-top: 0.15rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 400;
+    letter-spacing: 0;
+}
+
+/* --- fields --------------------------------------------------------------- */
+.co-field {
+    min-width: 0;
+}
+.co-field label {
+    margin: 1rem 0 0.4rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+.co-req {
+    color: var(--danger);
+}
+.co-opt {
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 400;
+}
+.co-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1rem;
+}
+.co-row-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.co-card input:not([type='radio']):not([type='hidden']),
+.co-card select,
+.co-card textarea {
+    min-height: 3rem;
+    padding: 0.7rem 0.9rem;
+    border: 1.5px solid color-mix(in srgb, var(--line) 80%, var(--text) 8%);
+    border-radius: 12px;
+    background-color: var(--surface);
+    font-size: 1rem; /* 16px: iOS Safari does not zoom into the field */
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease,
+        background-color 0.15s ease;
+}
+.co-card textarea {
+    min-height: 5.5rem;
+    line-height: 1.5;
+}
+.co-card input::placeholder {
+    color: color-mix(in srgb, var(--muted) 70%, transparent);
+}
+.co-card input:not([type='radio']):hover,
+.co-card select:not(:disabled):hover,
+.co-card textarea:hover {
+    border-color: color-mix(in srgb, var(--co-primary) 45%, var(--line));
+}
+.co-card input:not([type='radio']):focus,
+.co-card select:focus,
+.co-card textarea:focus {
+    outline: none;
+    border-color: var(--co-primary);
+    box-shadow: 0 0 0 4px var(--co-ring);
+}
+.co-card input[aria-invalid='true'],
+.co-card .is-invalid {
+    border-color: var(--danger);
+    background-color: color-mix(in srgb, var(--danger) 5%, var(--surface));
+}
+.co-card input[aria-invalid='true']:focus {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--danger) 20%, transparent);
+}
+.co-card .is-valid {
+    border-color: color-mix(in srgb, var(--ok) 60%, var(--line));
+}
+.co-error {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+    margin: 0.4rem 0 0;
+    color: var(--danger);
+    font-size: 0.85rem;
+    line-height: 1.35;
+}
+.co-error::before {
+    content: '!';
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 1rem;
+    height: 1rem;
+    margin-top: 0.1rem;
+    border-radius: 50%;
+    background: var(--danger);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+.co-help {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.85rem;
+    line-height: 1.45;
+}
+.co-center {
+    text-align: center;
+}
+
+/* --- area selects --------------------------------------------------------- */
+.co-areas {
+    margin: 0.5rem 0 0.4rem;
+    padding: 0.9rem 1rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--bg) 70%, var(--surface));
+}
+.co-areas .co-field label {
+    margin-top: 0.7rem;
+}
+.co-card select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-inline-end: 2.5rem;
+    cursor: pointer;
+    background-image:
+        linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+        linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+    background-position:
+        calc(100% - 1.25rem) 50%,
+        calc(100% - 0.9rem) 50%;
+    background-size: 0.36rem 0.36rem;
+    background-repeat: no-repeat;
+}
+[dir='rtl'] .co-card select {
+    background-position:
+        1.25rem 50%,
+        0.9rem 50%;
+}
+.co-card select:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+    background-color: color-mix(in srgb, var(--line) 30%, var(--surface));
+}
+.co-select.is-loading select {
+    cursor: progress;
+    background-image: none;
+    animation: co-pulse 1s ease-in-out infinite;
+}
+@keyframes co-pulse {
+    50% {
+        opacity: 0.45;
+    }
+}
+
+/* --- delivery note -------------------------------------------------------- */
+.co-note {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 1rem 0 0;
+    padding: 0.7rem 0.9rem;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--co-primary) 6%, var(--surface));
+    color: var(--text);
+    font-size: 0.9rem;
+}
+.co-note .co-ico {
+    color: var(--co-primary);
+}
+
+/* --- selectable options (payment, gateway) -------------------------------- */
+.co-option {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.9rem;
+    margin: 0.75rem 0 0;
+    padding: 1rem 1.1rem;
+    border: 1.5px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface);
+    font-weight: 400;
+    cursor: pointer;
+    transition:
+        border-color 0.15s ease,
+        background-color 0.15s ease,
+        box-shadow 0.15s ease;
+}
+.co-option:hover {
+    border-color: color-mix(in srgb, var(--co-primary) 50%, var(--line));
+}
+.co-option:has(input:checked) {
+    border-color: var(--co-primary);
+    background: color-mix(in srgb, var(--co-primary) 5%, var(--surface));
+    box-shadow: 0 0 0 3px var(--co-ring);
+}
+.co-option:has(input:focus-visible) {
+    outline: 3px solid var(--co-primary);
+    outline-offset: 2px;
+}
+/* The native radio stays in the page for keyboards and screen readers. */
+.co-option input[type='radio'] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+.co-option-icon {
+    display: grid;
+    place-items: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 12px;
+    background: var(--bg);
+    color: var(--muted);
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease;
+}
+.co-option:has(input:checked) .co-option-icon {
+    background: var(--co-primary);
+    color: var(--co-on-primary);
+}
+.co-option-text {
+    display: grid;
+    gap: 0.15rem;
+    min-width: 0;
+}
+.co-option-text strong {
+    font-weight: 650;
+}
+.co-option-text small {
+    color: var(--muted);
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+.co-option-tick {
+    display: grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 1.5px solid var(--line);
+    border-radius: 50%;
+    color: transparent;
+    transition:
+        background-color 0.15s ease,
+        border-color 0.15s ease,
+        color 0.15s ease;
+}
+.co-option-tick .co-ico {
+    width: 0.9rem;
+    height: 0.9rem;
+}
+.co-option:has(input:checked) .co-option-tick {
+    border-color: var(--co-primary);
+    background: var(--co-primary);
+    color: var(--co-on-primary);
+}
+.co-gateways {
+    margin: 0.25rem 0 0.25rem 1.1rem;
+    padding-inline-start: 1rem;
+    border-inline-start: 2px solid var(--line);
+}
+.co-option-small {
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: 0.75rem 1rem;
+}
+.co-option-small .gateway-logo {
+    display: block;
+}
+.co-back {
+    margin: 0.25rem 0 0;
+}
+.co-link {
+    color: var(--muted);
+    font-size: 0.92rem;
+    text-decoration: none;
+}
+.co-link:hover {
+    color: var(--text);
+    text-decoration: underline;
+}
+
+/* --- summary -------------------------------------------------------------- */
+.co-summary {
+    position: sticky;
+    top: 1.25rem;
+    min-width: 0;
+}
+.co-sum-box {
+    border: 1px solid var(--line);
+    border-radius: var(--co-radius);
+    background: var(--surface);
+    box-shadow: var(--co-shadow);
+    overflow: hidden;
+}
+.co-sum-box > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.15rem 1.4rem;
+    list-style: none;
+    cursor: default;
+}
+.co-sum-box > summary::-webkit-details-marker {
+    display: none;
+}
+.co-sum-box[open] > summary {
+    border-bottom: 1px solid var(--line);
+}
+.co-sum-head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+}
+.co-sum-head > .co-ico {
+    color: var(--co-primary);
+}
+.co-sum-title {
+    display: block;
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+.co-sum-count {
+    display: block;
+    color: var(--muted);
+    font-size: 0.82rem;
+}
+.co-sum-total {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.05rem;
+    font-variant-numeric: tabular-nums;
+}
+.co-chevron {
+    display: none;
+    transition: transform 0.2s ease;
+}
+.co-sum-box[open] .co-chevron {
+    transform: rotate(180deg);
+}
+.co-sum-box > :not(summary) {
+    margin-inline: 1.4rem;
+}
+
+.co-lines {
+    display: grid;
+    gap: 1rem;
+    max-height: 22rem;
+    margin-block: 1.1rem 0;
+    padding: 0;
+    overflow-y: auto;
+    list-style: none;
+}
+.co-lines li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.9rem;
+}
+.co-thumb {
+    position: relative;
+    display: block;
+}
+.co-thumb img,
+.co-thumb-blank {
+    display: grid;
+    place-items: center;
+    width: 4rem;
+    height: 4rem;
+    object-fit: cover;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--bg);
+    color: var(--muted);
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+.co-qty {
+    position: absolute;
+    top: -0.45rem;
+    inset-inline-end: -0.45rem;
+    min-width: 1.4rem;
+    padding: 0 0.35rem;
+    border-radius: 999px;
+    background: var(--co-primary);
+    color: var(--co-on-primary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.4rem;
+    text-align: center;
+    box-shadow: 0 0 0 2px var(--surface);
+}
+.co-line-body {
+    display: grid;
+    gap: 0.1rem;
+    min-width: 0;
+}
+.co-line-name {
+    font-weight: 600;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+.co-line-meta {
+    color: var(--muted);
+    font-size: 0.82rem;
+}
+.co-line-price {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.co-totals {
+    margin-block: 1.1rem 0;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+}
+.co-totals > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.3rem 0;
+}
+.co-totals dt {
+    color: var(--muted);
+}
+.co-totals dd {
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+    text-align: end;
+}
+.co-discount dd {
+    color: var(--ok);
+}
+.co-totals .co-grand {
+    margin-top: 0.5rem;
+    padding-top: 0.9rem;
+    border-top: 1px dashed var(--line);
+    font-size: 1.3rem;
+    font-weight: 750;
+}
+.co-totals .co-grand dt {
+    color: var(--text);
+}
+.co-sum-box > .co-help {
+    margin-block: 1.1rem 0;
+}
+
+.co-submit {
+    display: grid;
+    gap: 0.6rem;
+    margin-block: 1.25rem 0;
+}
+.co-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    min-height: 3.4rem;
+    padding: 0.8rem 1.4rem;
+    border: 0;
+    border-radius: 14px;
+    background: var(--co-primary);
+    color: var(--co-on-primary);
+    font: inherit;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    box-shadow: 0 8px 18px -8px color-mix(in srgb, var(--co-primary) 70%, transparent);
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        filter 0.15s ease;
+}
+.co-btn:hover:not(:disabled) {
+    background: var(--co-primary-strong);
+    transform: translateY(-1px);
+    box-shadow: 0 12px 22px -10px color-mix(in srgb, var(--co-primary) 80%, transparent);
+}
+.co-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+.co-btn:focus-visible {
+    outline: 3px solid var(--text);
+    outline-offset: 3px;
+}
+.co-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+.co-btn-arrow {
+    transform: rotate(-90deg);
+}
+html[dir='rtl'] .co-btn-arrow {
+    transform: rotate(90deg);
+}
+.co-btn[aria-busy='true'] {
+    cursor: progress;
+}
+.co-btn[aria-busy='true'] .co-btn-arrow {
+    display: none;
+}
+.co-btn[aria-busy='true'] .co-btn-label::before {
+    content: '';
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    margin-inline-end: 0.55em;
+    border: 2px solid currentColor;
+    border-inline-end-color: transparent;
+    border-radius: 50%;
+    vertical-align: -0.15em;
+    animation: co-spin 0.7s linear infinite;
+}
+@keyframes co-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.co-trust {
+    display: grid;
+    gap: 0.6rem;
+    margin-block: 1.25rem 0;
+    padding: 1rem 0 1.3rem;
+    border-top: 1px solid var(--line);
+    list-style: none;
+    color: var(--muted);
+    font-size: 0.83rem;
+    line-height: 1.4;
+}
+.co-trust li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+}
+.co-trust .co-ico {
+    width: 1.05rem;
+    height: 1.05rem;
+    margin-top: 0.05rem;
+    color: var(--ok);
+}
+
+/* --- phone bar ------------------------------------------------------------ */
+.co-bar {
+    display: none;
+}
+
+/* --- tablet and phone ------------------------------------------------------ */
+@media (max-width: 900px) {
+    .co-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 1.1rem;
+    }
+    .co-summary {
+        position: static;
+        order: -1;
+    }
+    .co-sum-box > summary {
+        padding: 0.95rem 1.1rem;
+        cursor: pointer;
+    }
+    .co-chevron {
+        display: block;
+    }
+    .co-sum-box > :not(summary) {
+        margin-inline: 1.1rem;
+    }
+    .co-submit {
+        display: none;
+    }
+    .co-trust {
+        margin-top: 1rem;
+    }
+    .co {
+        padding-bottom: 5.5rem;
+    }
+    .co-bar {
+        position: fixed;
+        inset-inline: 0;
+        bottom: 0;
+        z-index: 40;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
+        border-top: 1px solid var(--line);
+        background: color-mix(in srgb, var(--surface) 94%, transparent);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 -8px 24px -12px rgb(20 18 15 / 0.2);
+    }
+    .co-bar-total {
+        display: grid;
+        flex: none;
+        line-height: 1.2;
+    }
+    .co-bar-total span {
+        color: var(--muted);
+        font-size: 0.78rem;
+    }
+    .co-bar-total strong {
+        font-size: 1.15rem;
+        font-variant-numeric: tabular-nums;
+    }
+    .co-bar .co-btn {
+        flex: 1;
+        min-height: 3.1rem;
+    }
+}
+@media (max-width: 600px) {
+    .co-card {
+        padding: 1.15rem 1rem 1.3rem;
+        border-radius: 14px;
+    }
+    .co-row,
+    .co-row-3 {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .co-gateways {
+        margin-inline-start: 0.4rem;
+        padding-inline-start: 0.7rem;
+    }
+    .co-option {
+        padding: 0.9rem;
+        gap: 0.7rem;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .co *,
+    .co *::before {
+        animation: none !important;
+        transition: none !important;
+    }
+    .co-btn:hover:not(:disabled) {
+        transform: none;
+    }
+}
+
+@media (max-width: 600px) {
+    /* Three steps on one line, even at 360px. */
+    .co .steps {
+        flex-wrap: nowrap;
+        gap: 0.35rem;
+        font-size: 0.82rem;
+    }
+    .co .steps li {
+        gap: 0.3rem;
+        white-space: nowrap;
+    }
+    .co .steps li + li::before {
+        width: 0.7rem;
+    }
+}
+
+/* ==========================================================================
+   Button text: a button with a colour fill has a white label; every other
+   button (outline, transparent, white, light grey) has a black one.
+   Kept last, because the blanket "black" rule above is !important.
+   ========================================================================== */
+.btn,
+a.btn,
+button.btn,
+.btn.btn-quiet,
+.btn.btn-accent,
+.btn.track-submit,
+.co-btn,
+.search button,
+.storefront-header-search button,
+button.bg-sky-600,
+a.bg-sky-600 {
+    color: #fff !important;
+}
+.storefront-header-search button svg {
+    color: #fff !important;
+}
+/* Unfilled buttons turn blue on hover and their label turns white with them (rules above); at rest, black. */
+button.link,
+.storefront-mobile-menu-panel .storefront-mobile-menu-locale-button {
+    color: #000 !important;
 }
