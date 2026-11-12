@@ -241,6 +241,10 @@
         var district = document.getElementById('district');
         var city = document.getElementById('city');
 
+        // The selects start empty, so a value carried over from a failed
+        // submit would name an area the customer cannot see.
+        hidden.value = '';
+
         var fill = function (select, list) {
             while (select.options.length > 1) {
                 select.remove(1);
@@ -260,10 +264,18 @@
             select.disabled = list.length === 0;
         };
 
+        // A newer request for the same select supersedes an older, slower one.
+        var tickets = new WeakMap();
+
         var load = function (parent, select) {
+            var ticket = (tickets.get(select) || 0) + 1;
             var url =
                 '/api/areas' +
                 (parent ? '?parent=' + encodeURIComponent(parent) : '');
+
+            tickets.set(select, ticket);
+            select.setAttribute('aria-busy', 'true');
+            select.parentNode.classList.add('is-loading');
 
             return fetch(url, {
                 headers: { Accept: 'application/json' },
@@ -273,30 +285,62 @@
                     return response.ok ? response.json() : { data: [] };
                 })
                 .then(function (body) {
-                    fill(select, body.data || []);
+                    if (tickets.get(select) === ticket) {
+                        fill(select, body.data || []);
+                    }
                 })
                 .catch(function () {
                     /* the address field still works */
+                })
+                .then(function () {
+                    if (tickets.get(select) === ticket) {
+                        select.removeAttribute('aria-busy');
+                        select.parentNode.classList.remove('is-loading');
+                    }
                 });
+        };
+
+        // Remember what we typed into a text field ourselves, so a changed
+        // selection may replace it but something the customer wrote never is.
+        var written = new WeakMap();
+
+        var suggest = function (field, text) {
+            if (field && (!field.value || field.value === written.get(field))) {
+                field.value = text;
+                written.set(field, text);
+            }
+        };
+
+        var invalidate = function (select) {
+            // Cancel any request still in flight for a level below.
+            tickets.set(select, (tickets.get(select) || 0) + 1);
+            select.removeAttribute('aria-busy');
+            select.parentNode.classList.remove('is-loading');
+            fill(select, []);
         };
 
         selects.forEach(function (select, level) {
             select.addEventListener('change', function () {
                 for (var i = level + 1; i < selects.length; i++) {
-                    fill(selects[i], []);
+                    invalidate(selects[i]);
                 }
 
                 var chosen = select.value;
-                hidden.value = chosen;
-
                 var label = select.options[select.selectedIndex].textContent;
 
-                if (chosen && level === 1 && district && !district.value) {
-                    district.value = label;
+                // The most specific area chosen so far is the one submitted.
+                hidden.value = chosen;
+
+                if (!chosen && level > 0) {
+                    hidden.value = selects[level - 1].value;
                 }
 
-                if (chosen && level === 2 && city && !city.value) {
-                    city.value = label;
+                if (level === 1) {
+                    suggest(district, chosen ? label : '');
+                }
+
+                if (level === 2) {
+                    suggest(city, chosen ? label : '');
                 }
 
                 if (chosen && level < selects.length - 1) {
